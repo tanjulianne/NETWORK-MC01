@@ -1,10 +1,14 @@
 package MTPlayer;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -39,7 +43,8 @@ public class MTClient {
 	private DatagramPacket sendPacket, receivePacket;
 	private byte[] sendData, receiveData;
 	private ArrayList<String> instructions;
-	private String path;
+	private String sourceFilePath, destinationPath;
+	private FileEvent event;
 	
 	public MTClient() throws UnknownHostException, IOException {
 		initSocket();
@@ -50,7 +55,7 @@ public class MTClient {
 	private void initSocket() throws SocketException, UnknownHostException {
 		inFromUser = new BufferedReader(new InputStreamReader(System.in));       
 		clientSocket = new DatagramSocket();       
-		IPAddress = InetAddress.getByName("localhost");  
+		IPAddress = InetAddress.getByName("localhost");
 	}
 	
 	private void runProfileGUI() {
@@ -282,14 +287,6 @@ public class MTClient {
 		}*/
 	}
 	
-	private void sendImage() throws IOException {
-		FileOutputStream FOS = new FileOutputStream(path);
-		FOS.write(sendData);
-		sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);       
-		clientSocket.send(sendPacket);  
-		FOS.close();
-	}
-	
 	private void sendData(String sentence) throws IOException {
 		sendData = sentence.getBytes();       
 		sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);       
@@ -306,5 +303,48 @@ public class MTClient {
 	private void refreshData() {
 		sendData = new byte[1024];       
 		receiveData = new byte[1024]; 
+	}
+	
+	private void sendProfile() throws IOException {
+		event = getFileEvent();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ObjectOutputStream os = new ObjectOutputStream(outputStream);
+		os.writeObject(event);
+		byte[] data = outputStream.toByteArray();
+		DatagramPacket sendPacket = new DatagramPacket(data, data.length, IPAddress, 9876);
+		clientSocket.send(sendPacket);
+	}
+	
+	public FileEvent getFileEvent() {
+		FileEvent fileEvent = new FileEvent();
+		String fileName = sourceFilePath.substring(sourceFilePath.lastIndexOf("/") + 1, sourceFilePath.length());
+		String path = sourceFilePath.substring(0, sourceFilePath.lastIndexOf("/") + 1);
+		fileEvent.setDestinationDirectory(destinationPath);
+		fileEvent.setFilename(fileName);
+		fileEvent.setSourceDirectory(sourceFilePath);
+		File file = new File(sourceFilePath);
+		
+		if (file.isFile()) {
+			try {
+				DataInputStream diStream = new DataInputStream(new FileInputStream(file));
+				long len = (int) file.length();
+				byte[] fileBytes = new byte[(int) len];
+				int read = 0;
+				int numRead = 0;
+				while (read < fileBytes.length && (numRead = diStream.read(fileBytes, read, fileBytes.length - read)) >= 0) {
+				read = read + numRead;
+			}
+			fileEvent.setFileSize(len);
+			fileEvent.setFileData(fileBytes);
+			fileEvent.setStatus("Success");
+			} catch (Exception e) {
+				e.printStackTrace();
+				fileEvent.setStatus("Error");
+			}
+		} else {
+			System.out.println("path specified is not pointing to a file");
+			fileEvent.setStatus("Error");
+		}
+		return fileEvent;
 	}
 }

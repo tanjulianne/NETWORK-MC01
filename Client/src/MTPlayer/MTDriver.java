@@ -10,4 +10,3 @@ public class MTDriver {
 		MTClient player = new MTClient();
 	}
 }
-

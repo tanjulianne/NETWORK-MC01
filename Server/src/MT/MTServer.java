@@ -59,7 +59,14 @@ public class MTServer {
 	}
 	
 	private void requestProfiles() throws IOException {
-		//request for images
+		broadcast("request profile");
+		//byte[] data = recievePacket.getData();
+		//ByteArrayInputStream in = new ByteArrayInputStream(data);
+		//ObjectInputStream is = new ObjectInputStream(in);
+		//fileEvent = (FileEvent) is.readObject();
+		//if (fileEvent.getStatus().equalsIgnoreCase("Error")) {
+		//	System.out.println("Some issue happened while packing the data @ client side");
+		//receive the images and names
 		//store them
 		
 	}

@@ -255,7 +255,9 @@ public class MTClient {
 	}
 	
 	private void requestProfile() throws IOException {
-		
+		refreshData();
+		sendData("request profile");   
+		//recieve a lot of images
 	}
 	
 	private void requestInstructionSet() throws IOException {

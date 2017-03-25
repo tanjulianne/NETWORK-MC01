@@ -19,10 +19,11 @@ public class MTServer {
 	private DatagramPacket receivePacket, sendPacket;
 	private InetAddress IPAddress;
 	private int instructionSetNum, instructionNum, finalInstructionNum, userInput, counter, port;
-	private boolean instructionSetFlag, gameFlag, ongoingGameFlag;
+	private boolean instructionSetFlag, gameFlag, ongoingGameFlag, profileFlag;
 	
 	public MTServer() throws IOException {
 		counter = 0;
+		profileFlag = false;
 		instructionSetFlag= false;
 		gameFlag = false;
 		ongoingGameFlag = false;
@@ -57,19 +58,13 @@ public class MTServer {
 		}
 	}
 	
-	private void requestImage() throws IOException {
+	private void requestProfiles() throws IOException {
 		//request for images
 		//store them
 		
 	}
 	
-	private void broadcastGame() throws IOException {
-		String response = "";
-		if (userInput == finalInstructionNum)
-			response = getNewInstructions();      
-		else
-			response = fetchInstructions(instructionSetNum, instructionNum);
-		
+	private void broadcast(String response) throws IOException {
 		for (InetAddress i: IPAddresses) {
 			int index = IPAddresses.indexOf(i);
 			sendData = response.getBytes();                   
@@ -78,22 +73,21 @@ public class MTServer {
 		}
 	}
 	
-	private void broadcast() throws IOException {
-		
-	}
-	
 	private void sendData() throws IOException {
 		String response = "";
 		if (ongoingGameFlag) {
-			broadcastGame();
+			if (userInput == finalInstructionNum)
+				broadcast(getNewInstructions());
+			else
+				broadcast(fetchInstructions(instructionSetNum, instructionNum));
 		} else if (gameFlag) {
 			IPAddresses.add(IPAddress);
 			ports.add(port);
 			if (counter >= 2) {
-				response = "OK";
+				broadcast("OK");
 				ongoingGameFlag = true;
 			} else {
-				response = "NOT ENOUGH PLAYERS";
+				broadcast("NOT ENOUGH PLAYERS");
 			}
 			gameFlag = false;
 		} else if (instructionSetFlag) {
@@ -101,6 +95,8 @@ public class MTServer {
 			instructionSetFlag = false;
 			sendInstructions();
 			response = "OK";
+		} else if (profileFlag) {
+			requestProfiles();
 		}
 		
 		sendData = response.getBytes();                   
@@ -124,13 +120,13 @@ public class MTServer {
 		if (sentence.contains("request instruction set")) {
 			addInstructionSet();
 		} else if (sentence.contains("request profile")) {
-			//give profile
+			profileFlag = true;
 		} else if (sentence.contains("request game")) {
 			gameFlag = true;
-		} else if (sentence == null) {
-			// do nothing~		
-		} else {
+		} else if (sentence != null) {
 			userInput = Integer.parseInt(sentence);
+		} else {
+			
 		}
 	}
 	

@@ -132,10 +132,10 @@ public class MTServer {
 			profileFlag = true;
 		} else if (sentence.contains("request game")) {
 			gameFlag = true;
-		} else if (sentence != null) {
-			userInput = Integer.parseInt(sentence);
 		} else if (sentence.contains("username")) {
 			names.add(new String(receivePacket.getData()).trim());
+		} else if (sentence != null) {
+			userInput = Integer.parseInt(sentence);
 		}
 	}
 	

@@ -77,7 +77,6 @@ public class MTClient {
 		
 		JPanel profilePanels = new JPanel();
 		profilePanels.setLayout(new BoxLayout(profilePanels, BoxLayout.Y_AXIS));
-		//request profiles
 		ArrayList<JLabel> names = new ArrayList<JLabel>();
 		names.add(new JLabel("Ashley"));
 		names.add(new JLabel("Martin"));
@@ -232,7 +231,7 @@ public class MTClient {
 					if(instructions.isEmpty()) {
 						requestInstructionSet(); 
 						refreshData();
-						//waitForGame();
+						waitForGame();
 					}
 				} catch (IOException e1) {
 					e1.printStackTrace(); 
@@ -244,12 +243,19 @@ public class MTClient {
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
+			} else if (command.equals("Wait")) {
+				flag = true;
+				try {
+					waitForGame();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
 	
 	private void waitForGame() throws IOException {
-		boolean flag = true;
+		flag = true;
 		while(flag) {
 			refreshData();
 			String response =  recieveData();
@@ -258,6 +264,7 @@ public class MTClient {
 			}
 		}
 		runGameGUI();
+		runGame();
 	}
 	
 	private void requestGame() throws IOException {
@@ -267,7 +274,7 @@ public class MTClient {
 		response = recieveData();
 		if (response.contains("OK")) {
 			runGameGUI();
-			//runGame();
+			runGame();
 		} else {
 			System.out.println("Not enough players");
 			waitForGame();

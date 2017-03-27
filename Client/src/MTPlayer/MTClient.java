@@ -45,11 +45,21 @@ public class MTClient {
 	private ArrayList<String> instructions;
 	private String sourceFilePath, destinationPath;
 	private FileEvent event;
+	private boolean flag;
 	
-	public MTClient() throws UnknownHostException, IOException {
+	public MTClient(String name) throws UnknownHostException, IOException {
 		initSocket();
 		instructions = new ArrayList<String>();
 		prepareGUI();
+		flag = true;
+		handshake(name);
+	}
+	
+	private void handshake(String name) throws IOException {
+		refreshData();
+		sendData("username");
+		refreshData();
+		sendData(name);
 	}
 	
 	private void initSocket() throws SocketException, UnknownHostException {
@@ -225,7 +235,7 @@ public class MTClient {
 						//waitForGame();
 					}
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					e1.printStackTrace(); 
 				}
 			} else if (command.equals("Game")) {
 				try {
@@ -239,8 +249,15 @@ public class MTClient {
 	}
 	
 	private void waitForGame() throws IOException {
-		//server throws somebody engaged a game or something
-		//you either reply with yes or no
+		boolean flag = true;
+		while(flag) {
+			refreshData();
+			String response =  recieveData();
+			if (response.contains("OK")) {
+				flag = false;
+			}
+		}
+		runGameGUI();
 	}
 	
 	private void requestGame() throws IOException {
@@ -249,20 +266,18 @@ public class MTClient {
 		String response = recieveData();
 		response = recieveData();
 		if (response.contains("OK")) {
-			//initiate
-			//server sends OK to all players in lobby which forces the game to start for them
 			runGameGUI();
 			//runGame();
 		} else {
 			System.out.println("Not enough players");
-			//pop up not enough players
+			waitForGame();
 		}
 	}
 	
 	private void requestProfile() throws IOException {
 		refreshData();
-		sendData("request profile");   
-		//recieve a lot of images
+		sendData("request profile"); 
+		//receive a lot of images and names
 	}
 	
 	private void requestInstructionSet() throws IOException {

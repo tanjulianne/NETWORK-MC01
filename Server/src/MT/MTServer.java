@@ -11,6 +11,8 @@ import javax.swing.*;
 public class MTServer {
 	private ArrayList<ArrayList<String>> instructionSet = new ArrayList<ArrayList<String>>();
 	private ArrayList<ArrayList<String>> instructions = new ArrayList<ArrayList<String>>();
+	private ArrayList<String> names = new ArrayList<String>();
+	private ArrayList<String> images = new ArrayList<String>();
 	ArrayList<InetAddress> IPAddresses = new ArrayList<InetAddress>();
 	ArrayList<Integer> ports = new ArrayList<Integer>();
 	private DatagramSocket serverSocket;
@@ -132,8 +134,8 @@ public class MTServer {
 			gameFlag = true;
 		} else if (sentence != null) {
 			userInput = Integer.parseInt(sentence);
-		} else {
-			
+		} else if (sentence.contains("username")) {
+			names.add(new String(receivePacket.getData()).trim());
 		}
 	}
 	

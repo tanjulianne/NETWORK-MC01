@@ -7,6 +7,9 @@ import java.util.Scanner;
 
 public class MTDriver {
 	public static void main(String[] args)  throws IOException {
-		MTClient player = new MTClient();
+		Scanner sc = new Scanner(System.in);
+		System.out.println("What is your name?: ");
+		String name = sc.nextLine();
+		MTClient player = new MTClient(name);
 	}
 }
